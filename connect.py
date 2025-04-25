@@ -10,60 +10,70 @@ terminate_program = False
 
 print('Welcome to your database of employees and companies.\nPlease select the action that you would like to take:')
 
-while terminate_program is False:
+## APPLICATION LOOP
+while terminate_program is False: 
     print('\n[C]reate [V]iew [U]pdate [D]elete [Q]uit')
     user_input = input('User Action: ').capitalize()
-    if user_input == 'C':
+
+    if user_input == 'C': ## CREATE ROUTE
         while user_input == 'C':
             create_obj = input('Create [c]ompany or [e]mployee: ').lower()
-            if create_obj == 'c':
+
+            if create_obj == 'c': ## Company creation
                 name = input('Company Name: ')
                 address = input('Company Address: ')
                 cursor.execute("INSERT INTO companies (name, address) VALUES (%s, %s)", [name, address])
                 connection.commit()
                 print('Created:\nCompany: ' + name + '\nAddress: ' + address)
                 user_input = None
-            elif create_obj == 'e':
+
+            elif create_obj == 'e': ## Employee creation
                 name = input('Employee Name: ')
                 age = input('Employee Age: ')
                 cursor.execute("SELECT company_id, name FROM companies")
                 companies = cursor.fetchall()
                 for company in companies:
-                    print('Company Name: ' + company[1] + 'Company ID: ' + str(company[0]))
+                    print('Company ID: ' + str(company[0]) + ' Company Name: ' + company[1])
                 company = input('Input company id for employee to work at: ')
                 cursor.execute("INSERT INTO employees (name, age, company_id) Values (%s, %s, %s)", [name, age, company])
                 connection.commit()
                 cursor.execute('SELECT name FROM companies WHERE company_id = %s', [company])
                 print('Created:\nEmployee Name: ' + name + '\nAge: ' + age + '\nCompany: ' + cursor.fetchone()[0])
                 user_input = None
-            else:
+
+            else: ## Return to menu on failed input
                 print('Invalid input, returning to main menu.')
                 user_input = None
-    elif user_input == 'V':
+
+    elif user_input == 'V': ## VIEW ROUTE
         while user_input == 'V':
             table_view = input('View [c]ompany data or [e]mployee data: ').lower()
-            if table_view == 'c':
+
+            if table_view == 'c': ## Companies view
                 print('List of all the companies and their addresses:')
                 cursor.execute('SELECT companies.name, companies.address, COUNT(employees.company_id) FROM companies LEFT JOIN employees ON employees.company_id = companies.company_id GROUP BY companies.company_id ORDER BY companies.name ASC;')
-                # cursor.execute("SELECT name, address FROM companies")
                 companies = cursor.fetchall()
                 for company in companies:
                     print('Company Name: ' + company[0] + ' Address: ' + company[1] + ' Employee Count: ' + str(company[2]))
                 user_input = None
-            elif table_view == 'e':
+
+            elif table_view == 'e': ## Employees view
                 cursor.execute("SELECT employees.employee_id, employees.name, employees.age, companies.name FROM employees JOIN companies ON employees.company_id = companies.company_id ORDER BY employees.name ASC;")
                 print('List of all the employees, ages, and company ID:')
                 employees = cursor.fetchall()
                 for employee in employees:
                     print('Employee ID: ' + str(employee[0]) + ' Employee Name: ' + employee[1] + ' Age: ' + str(employee[2]) + ' Company: ' + employee[3])
                 user_input = None
-            else:
+
+            else: ## Return to menu on failed input
                 print('Invalid input, returning to main menu.')
                 user_input = None
-    elif user_input == 'U':
+
+    elif user_input == 'U': ## UPDATE ROUTE
         while user_input == 'U':
             update_obj = input('Update [c]ompany data or [e]mployee data: ').lower()
-            if update_obj == 'c':
+
+            if update_obj == 'c': ## Companies update
                 cursor.execute("SELECT * FROM companies")
                 companies = cursor.fetchall()
                 for company in companies:
@@ -79,7 +89,8 @@ while terminate_program is False:
                 connection.commit()
                 print('\nUpdated Company Name: ' + name + '\nAddress: ' + address)
                 user_input = None
-            elif update_obj == 'e':
+
+            elif update_obj == 'e': ## Employee update
                 cursor.execute("SELECT * FROM employees")
                 employees = cursor.fetchall()
                 for employee in employees:
@@ -99,13 +110,16 @@ while terminate_program is False:
                 cursor.execute('SELECT name FROM companies WHERE company_id = %s', [company])
                 print('Created:\nEmployee Name: ' + name + '\nAge: ' + age + '\nCompany: ' + cursor.fetchone()[0])
                 user_input = None
-            else:
+
+            else: ## Return to menu on failed input
                 print('Invalid input, returning to main menu.')
                 user_input = None
-    elif user_input == 'D':
+
+    elif user_input == 'D': ## DELETE ROUTE
         while user_input == 'D':
             delete_obj = input('Delete [c]ompany data or [e]mployee data: ').lower()
-            if delete_obj == 'c':
+
+            if delete_obj == 'c': ## Companies delete
                 cursor.execute("SELECT * FROM companies")
                 companies = cursor.fetchall()
                 for company in companies:
@@ -120,10 +134,10 @@ while terminate_program is False:
                         continue
                 print('Delete request ended, returning to main menu.')
                 user_input = None
-            elif delete_obj == 'e':
+
+            elif delete_obj == 'e': ## Employees delete
                 cursor.execute("SELECT * FROM employees")
                 employees = cursor.fetchall()
-                # print(employees)
                 for employee in employees:
                     print('Employee ID: ' + str(employee[0]) + ' Employee Name: ' + employee[1] + ' Age: ' + str(employee[2]) + ' Company: ' + str(employee[3]))
                 delete_choice = input('Input employee ID to delete: ')
@@ -136,12 +150,14 @@ while terminate_program is False:
                         continue
                 print('Delete request ended, returning to main menu.')
                 user_input = None
-            else:
+
+            else: ## Return to menu on failed input
                 print('Invalid input, returning to main menu.')
                 user_input = None
-    elif user_input == 'Q':
+
+    elif user_input == 'Q': ## Close Application route
         terminate_program = True
 
-print('Thank you for your time, see you later!')
+print('Thank you, see you again!')
 
 connection.close()
